@@ -3,6 +3,8 @@ fs = require('fs')
 parser = require('L7')
 Faker = require('Faker')
 _s = require('underscore.string')
+crypto = require('crypto')
+argv = require('optimist').argv
 
 num = (x, places) ->
   x = Math.floor(Math.random() * x) + 1
@@ -16,7 +18,8 @@ randomDate = ->
 
 module.exports =
   run: ->
-    [ engine, executable, input ] = process.argv
+    [ input ] = argv._
+    { files } = argv
 
     fs.readFile(path.join(process.cwd, input), 'utf8', (err, content) ->
       if err
@@ -25,6 +28,7 @@ module.exports =
         messages = content.split(/(\r\n){2,}/)
 
         deindentified = _.map(messages, (message) ->
+          original = message
           message = message.trim()
           return unless message
 
@@ -39,7 +43,19 @@ module.exports =
           replace('NK1|4',  "#{Faker.Address.streetAddress()}^^#{Faker.Address.city()}^^#{Faker.Address.zipCode()}")
           replace('PID|11', "#{Faker.Address.streetAddress()}^^#{Faker.Address.city()}^^#{Faker.Address.zipCode()}")
           replace('PID|7', randomDate())
-          console.log(message)
-          console.log('\r\n')
+
+          if files
+            id = parsed.query('MSH|10')
+            type = parsed.query('MSH|9').replace(/\^/, '-')
+            unless id
+              sum = crypto.createHash('md5')
+              sum.update(original)
+              id = sum.digest('hex').substring(0, 12)
+            name = "msg-#{type}-#{id}"
+            console.log("Writing file #{name}")
+            fs.writeFile(name, message)
+          else
+            console.log(message)
+            console.log('\r\n')
         )
     )

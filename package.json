@@ -15,6 +15,7 @@
     "coffee-script": "latest",
     "Faker": "latest",
     "L7": "latest",
+    "optimist": "latest",
     "underscore": "latest",
     "underscore.string": "latest"
   },
