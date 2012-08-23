@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/wombleton/everglade.png)](http://travis-ci.org/wombleton/everglade)
 everglade
 =========
 
